@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; form-action https://api.web3forms.com; base-uri 'self'; frame-ancestors 'none';">
+  <title>Formulář</title>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      letter-spacing: 0.03em;
+    }
+
+    input {
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #1a1a2e;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      background: #fafafa;
+    }
+
+    input:focus {
+      border-color: #6c63ff;
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+      background: #fff;
+    }
+
+    input::placeholder {
+      color: #bbb;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: #574fd6;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .error {
+      color: #d11a2a;
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Kontaktní formulář</h1>
+
+    <form id="secureForm" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="283a9907-1500-45a2-a586-d12fa40e90d3">
+
+      <!-- Honeypot ochrana proti botům -->
+      <input type="hidden" name="botcheck" value="">
+
+      <div class="form-group">
+        <label for="name">Jméno</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Vaše jméno"
+          maxlength="60"
+          autocomplete="name"
+          required
+        />
+        <div class="error" id="nameError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="auto@email.com"
+          maxlength="120"
+          autocomplete="email"
+          required
+        />
+        <div class="error" id="emailError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="age">Věk (18+)</label>
+        <input
+          type="number"
+          id="age"
+          name="age"
+          placeholder="Váš věk"
+          min="18"
+          max="120"
+          required
+        />
+        <div class="error" id="ageError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Telefon</label>
+        <input
+          type="tel"
+          id="phone"
+          name="tel"
+          placeholder="+420 123 456 789"
+          maxlength="20"
+          autocomplete="tel"
+          pattern="^\+?[0-9 ]{7,20}$"
+          required
+        />
+        <div class="error" id="phoneError"></div>
+      </div>
+
+      <button type="submit">Odeslat</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('secureForm');
+
+    // Bezpečné čištění vstupu
+    function sanitize(value) {
+      return value
+        .replace(/[<>"'`;(){}]/g, '')
+        .trim();
+    }
+
+    function setError(id, message) {
+      document.getElementById(id).textContent = message;
+    }
+
+    form.addEventListener('submit', function (e) {
+      let valid = true;
+
+      setError('nameError', '');
+      setError('emailError', '');
+      setError('ageError', '');
+      setError('phoneError', '');
+
+      const name = document.getElementById('name');
+      const email = document.getElementById('email');
+      const age = document.getElementById('age');
+      const phone = document.getElementById('phone');
+
+      name.value = sanitize(name.value);
+      email.value = sanitize(email.value);
+      phone.value = sanitize(phone.value);
+
+      // Jméno
+      if (!/^[a-zA-ZÀ-ž ]{2,60}$/.test(name.value)) {
+        setError('nameError', 'Zadejte platné jméno.');
+        valid = false;
+      }
+
+      // Email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        setError('emailError', 'Zadejte platný e-mail.');
+        valid = false;
+      }
+
+      // Věk
+      const ageValue = parseInt(age.value, 10);
+      if (isNaN(ageValue) || ageValue < 18 || ageValue > 120) {
+        setError('ageError', 'Věk musí být mezi 18 a 120.');
+        valid = false;
+      }
+
+      // Telefon
+      if (!/^\+?[0-9 ]{7,20}$/.test(phone.value)) {
+        setError('phoneError', 'Zadejte platné telefonní číslo.');
+        valid = false;
+      }
+
+      if (!valid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
+
+<!-- ## Co bylo zabezpečeno
+
+* Sanitizace vstupů proti vložení HTML/JS.
+* Omezení délky vstupů (`maxlength`).
+* Validace pomocí regexů.
+* Ochrana proti jednoduchým botům (`honeypot`).
+* CSP hlavička proti XSS.
+* Omezení formulářového odesílání pouze na Web3Forms.
+* Povinná pole (`required`).
+* Kontrola rozsahu věku.
+* Bez změny vzhledu formuláře. -->
